@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  email     String    @unique
+  password  String
+  projects  Project[]
+  sessions  Session[]
+  profile   Profile?
+}
+
+model Project {
+  id        Int      @id @default(autoincrement())
+  name      String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  ownerId   Int
+}
+
+model Session {
+  id         String   @id @default(uuid()) // Unique identifier for the session
+  userId     Int      // Reference to the user (foreign key) - Changed to Int
+  token      String   // The JWT or session token
+  createdAt  DateTime @default(now()) // Timestamp when the session was created
+  expiresAt  DateTime // When the token or session will expire
+  isActive   Boolean  @default(true) // Flag to indicate if the token is active or inactive
+  ipAddress  String?  // Optional: Store IP address if needed
+  userAgent  String?  // Optional: Store user agent information (browser, OS, etc.)
+  device     String?  // Optional: Store device details if needed
+
+  user       User     @relation(fields: [userId], references: [id]) // Relation to the User model
+}
+
+model Profile {
+  id        Int       @id @default(autoincrement())
+  name      String
+  bio       String?   // Optional: Bio of the user
+  avatarUrl String?   // Optional: URL to the user's profile picture
+  website   String?   // Optional: Personal website or social media link
+  userId    Int       @unique // Ensure that a profile is unique to one user
+  user      User      @relation(fields: [userId], references: [id]) // Relation to the User model
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+
+
+
+
+
+
+
